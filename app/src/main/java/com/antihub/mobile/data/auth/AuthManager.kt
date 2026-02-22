@@ -52,6 +52,10 @@ class AuthManagerImpl @Inject constructor(
         val state = PkceUtil.generateState()
         pendingCodeVerifier = verifier
         pendingAuthState = state
+        securePreferences.savePendingPkce(
+            state = state,
+            codeVerifier = verifier,
+        )
 
         val authUri = Uri.parse("https://github.com/login/oauth/authorize").buildUpon()
             .appendQueryParameter("client_id", clientId.ifBlank { "" })
@@ -75,6 +79,7 @@ class AuthManagerImpl @Inject constructor(
 
     override suspend fun logout() {
         securePreferences.clearAuthToken()
+        securePreferences.clearPendingPkce()
         tokenState.value = TokenState.Unauthenticated
     }
 
@@ -119,15 +124,23 @@ class AuthManagerImpl @Inject constructor(
             return Result.failure(IllegalArgumentException("Invalid oauth callback uri"))
         }
 
+        val exchangeConfigError = AppConfig.oauthExchangeConfigError()
+        if (exchangeConfigError != null) {
+            return Result.failure(IllegalStateException(exchangeConfigError))
+        }
+
         val code = uri.getQueryParameter("code")
         val state = uri.getQueryParameter("state")
-        val verifier = pendingCodeVerifier
+        val verifier = pendingCodeVerifier ?: securePreferences.getPendingCodeVerifier()
+        val expectedState = pendingAuthState ?: securePreferences.getPendingOauthState()
 
         if (code.isNullOrBlank() || state.isNullOrBlank() || verifier.isNullOrBlank()) {
+            securePreferences.clearPendingPkce()
             return Result.failure(IllegalStateException("OAuth callback missing required params"))
         }
 
-        if (state != pendingAuthState) {
+        if (state != expectedState) {
+            securePreferences.clearPendingPkce()
             return Result.failure(IllegalStateException("OAuth state mismatch"))
         }
 
@@ -147,6 +160,7 @@ class AuthManagerImpl @Inject constructor(
             )
             pendingCodeVerifier = null
             pendingAuthState = null
+            securePreferences.clearPendingPkce()
             tokenState.value = TokenState.Authenticated(response.accessToken, expiresAt)
         }
     }

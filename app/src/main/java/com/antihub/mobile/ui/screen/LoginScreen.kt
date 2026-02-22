@@ -96,6 +96,11 @@ fun LoginScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 10.dp, bottom = 20.dp),
                 )
+                Text(
+                    text = "授权后会自动回到 App；若未登录成功，请检查 OAuth 与换 token 服务配置",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = 14.dp),
+                )
 
                 Button(onClick = {
                     val activity = context.findActivity() ?: return@Button

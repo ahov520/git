@@ -6,6 +6,7 @@ object AppConfig {
     const val githubApiBaseUrl: String = "https://api.github.com/"
     private const val defaultRedirectScheme = "githubmobile"
     private const val defaultRedirectHost = "auth"
+    private const val defaultAuthProxyBaseUrl = "https://example.com/"
 
     val githubClientId: String = BuildConfig.GITHUB_CLIENT_ID.trim()
     val githubRedirectScheme: String = BuildConfig.GITHUB_REDIRECT_SCHEME.trim().ifBlank { defaultRedirectScheme }
@@ -16,7 +17,7 @@ object AppConfig {
 
     private fun normalizeBaseUrl(url: String): String {
         if (url.isBlank()) {
-            return "https://example.com/"
+            return defaultAuthProxyBaseUrl
         }
         return if (url.endsWith('/')) url else "$url/"
     }
@@ -26,6 +27,13 @@ object AppConfig {
     fun oauthConfigError(): String? {
         if (githubClientId.isBlank()) {
             return "未配置 GH_OAUTH_CLIENT_ID，请在构建环境设置 GitHub OAuth Client ID"
+        }
+        return null
+    }
+
+    fun oauthExchangeConfigError(): String? {
+        if (authProxyBaseUrl == defaultAuthProxyBaseUrl) {
+            return "未配置 GH_AUTH_PROXY_BASE_URL，无法用授权码换取访问令牌"
         }
         return null
     }

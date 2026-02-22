@@ -56,10 +56,33 @@ class SecurePreferences @Inject constructor(
         return value.takeIf { it > 0L }
     }
 
+    fun savePendingPkce(
+        state: String,
+        codeVerifier: String,
+    ) {
+        prefs.edit()
+            .putString(KEY_OAUTH_STATE, state)
+            .putString(KEY_OAUTH_CODE_VERIFIER, codeVerifier)
+            .apply()
+    }
+
+    fun clearPendingPkce() {
+        prefs.edit()
+            .remove(KEY_OAUTH_STATE)
+            .remove(KEY_OAUTH_CODE_VERIFIER)
+            .apply()
+    }
+
+    fun getPendingOauthState(): String? = prefs.getString(KEY_OAUTH_STATE, null)
+
+    fun getPendingCodeVerifier(): String? = prefs.getString(KEY_OAUTH_CODE_VERIFIER, null)
+
     companion object {
         private const val FILE_NAME = "secure_prefs"
         private const val KEY_ACCESS_TOKEN = "key_access_token"
         private const val KEY_REFRESH_TOKEN = "key_refresh_token"
         private const val KEY_EXPIRES_AT_EPOCH_SECONDS = "key_expires_at_epoch_seconds"
+        private const val KEY_OAUTH_STATE = "key_oauth_state"
+        private const val KEY_OAUTH_CODE_VERIFIER = "key_oauth_code_verifier"
     }
 }

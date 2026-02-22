@@ -51,6 +51,7 @@ OAuth 相关至少需要确保：
 
 - `GH_OAUTH_CLIENT_ID` 不能为空
 - GitHub OAuth App 的 Authorization callback URL 与客户端一致（默认）：`githubmobile://auth`
+- `GH_AUTH_PROXY_BASE_URL` 指向可用的后端换 token 服务（不能是示例地址）
 
 ### 3. 构建 Debug APK
 
@@ -71,6 +72,8 @@ OAuth 相关至少需要确保：
 - `redirect_uri=%3A%2F%2F`
 
 说明构建时 OAuth 环境变量为空，应用会拒绝发起授权并提示配置错误。
+
+如果你能授权但回到应用后仍停留在登录页，通常是 `GH_AUTH_PROXY_BASE_URL` 未配置或后端服务不可达。
 
 后端至少需要实现：
 
