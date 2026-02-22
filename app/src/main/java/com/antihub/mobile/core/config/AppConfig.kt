@@ -24,17 +24,25 @@ object AppConfig {
 
     fun oauthRedirectUri(): String = "$githubRedirectScheme://$githubRedirectHost"
 
+    fun oauthAuthorizeRedirectUri(): String {
+        return if (authProxyBaseUrl == defaultAuthProxyBaseUrl) {
+            oauthRedirectUri()
+        } else {
+            "${authProxyBaseUrl}oauth/github/callback"
+        }
+    }
+
     fun oauthConfigError(): String? {
         if (githubClientId.isBlank()) {
             return "未配置 GH_OAUTH_CLIENT_ID，请在构建环境设置 GitHub OAuth Client ID"
+        }
+        if (authProxyBaseUrl == defaultAuthProxyBaseUrl) {
+            return "未配置 GH_AUTH_PROXY_BASE_URL，请设置可访问的后端地址"
         }
         return null
     }
 
     fun oauthExchangeConfigError(): String? {
-        if (authProxyBaseUrl == defaultAuthProxyBaseUrl) {
-            return "未配置 GH_AUTH_PROXY_BASE_URL，无法用授权码换取访问令牌"
-        }
-        return null
+        return oauthConfigError()
     }
 }

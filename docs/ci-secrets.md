@@ -21,6 +21,7 @@
 - `ANDROID_KEYSTORE_BASE64`: 使用 `base64` 编码后的 keystore 文件内容
 - Release workflow 会在运行时解码为 `${{ github.workspace }}/release.keystore`
 - `GH_OAUTH_CLIENT_ID` 必须设置为 GitHub OAuth App 的 Client ID，不能为空
-- 默认回调 URI 为 `githubmobile://auth`，需在 GitHub OAuth App 配置的 callback URL 中保持一致
 - `GH_AUTH_PROXY_BASE_URL` 必须是可访问的后端服务地址，不能使用示例值 `https://example.com`
+- GitHub OAuth App 的 callback URL 需配置为：`<GH_AUTH_PROXY_BASE_URL>/oauth/github/callback`
+- `GH_AUTH_PROXY_BASE_URL` 只填域名（例如 `https://proxy.example.com`），不要带 `/oauth/...` 路径
 - 若你还没有后端，可直接部署仓库内 `auth-proxy/`（见 `auth-proxy/README.md`）

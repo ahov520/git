@@ -28,9 +28,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="${oauthRedirectHost}"
-                    android:scheme="${oauthRedirectScheme}" />
+                <data android:scheme="${oauthRedirectScheme}" />
             </intent-filter>
         </activity>
     </application>

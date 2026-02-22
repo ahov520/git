@@ -50,8 +50,8 @@ export GOOGLE_TRANSLATE_API_KEY="your_google_api_key"
 OAuth 相关至少需要确保：
 
 - `GH_OAUTH_CLIENT_ID` 不能为空
-- GitHub OAuth App 的 Authorization callback URL 与客户端一致（默认）：`githubmobile://auth`
 - `GH_AUTH_PROXY_BASE_URL` 指向可用的后端换 token 服务（不能是示例地址）
+- GitHub OAuth App 的 Authorization callback URL 填：`https://<你的代理域名>/oauth/github/callback`
 
 ### 3. 构建 Debug APK
 
@@ -75,6 +75,12 @@ OAuth 相关至少需要确保：
 
 如果你能授权但回到应用后仍停留在登录页，通常是 `GH_AUTH_PROXY_BASE_URL` 未配置或后端服务不可达。
 
+如果浏览器授权后停在网页、App 无反应，重点检查：
+
+- GitHub OAuth App callback URL 是否精确等于 `https://<代理域名>/oauth/github/callback`
+- `GH_AUTH_PROXY_BASE_URL` 是否只填域名（如 `https://proxy.example.com`，不带路径）
+- `https://<代理域名>/health` 是否返回 `hasClientId=true` 和 `hasClientSecret=true`
+
 后端至少需要实现：
 
 - `POST /oauth/github/exchange`
@@ -92,9 +98,11 @@ OAuth 相关至少需要确保：
 2. 在部署平台配置环境变量：
    - `GH_OAUTH_CLIENT_ID`
    - `GH_OAUTH_CLIENT_SECRET`
-   - `OAUTH_REDIRECT_URI_ALLOWLIST=githubmobile://auth`
+   - `MOBILE_APP_CALLBACK_URI=githubmobile://auth`
+   - `OAUTH_REDIRECT_URI_ALLOWLIST=`（可留空）
 3. 拿到部署域名，例如 `https://proxy.example.com`。
-4. 仓库 Actions Secret `GH_AUTH_PROXY_BASE_URL` 填这个域名（不带路径）。
+4. GitHub OAuth App callback URL 设为 `https://proxy.example.com/oauth/github/callback`。
+5. 仓库 Actions Secret `GH_AUTH_PROXY_BASE_URL` 填这个域名（不带路径）。
 
 详细说明见：`auth-proxy/README.md`
 

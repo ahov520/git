@@ -59,7 +59,7 @@ class AuthManagerImpl @Inject constructor(
 
         val authUri = Uri.parse("https://github.com/login/oauth/authorize").buildUpon()
             .appendQueryParameter("client_id", clientId.ifBlank { "" })
-            .appendQueryParameter("redirect_uri", AppConfig.oauthRedirectUri())
+            .appendQueryParameter("redirect_uri", AppConfig.oauthAuthorizeRedirectUri())
             .appendQueryParameter("scope", "read:user repo notifications")
             .appendQueryParameter("state", state)
             .appendQueryParameter("code_challenge", challenge)
@@ -120,8 +120,11 @@ class AuthManagerImpl @Inject constructor(
     override fun getTokenState(): StateFlow<TokenState> = tokenState.asStateFlow()
 
     override suspend fun handleAuthCallback(uri: Uri): Result<Unit> {
-        if (uri.scheme != AppConfig.githubRedirectScheme || uri.host != AppConfig.githubRedirectHost) {
+        if (uri.scheme != AppConfig.githubRedirectScheme) {
             return Result.failure(IllegalArgumentException("Invalid oauth callback uri"))
+        }
+        if (uri.host != AppConfig.githubRedirectHost) {
+            Timber.w("OAuth callback host mismatch: expected=%s actual=%s", AppConfig.githubRedirectHost, uri.host)
         }
 
         val exchangeConfigError = AppConfig.oauthExchangeConfigError()
@@ -149,7 +152,7 @@ class AuthManagerImpl @Inject constructor(
                 ExchangeCodeRequest(
                     code = code,
                     codeVerifier = verifier,
-                    redirectUri = AppConfig.oauthRedirectUri(),
+                    redirectUri = AppConfig.oauthAuthorizeRedirectUri(),
                 ),
             )
             val expiresAt = response.expiresInSeconds?.let { Instant.now().epochSecond + it }
