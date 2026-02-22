@@ -82,6 +82,22 @@ OAuth 相关至少需要确保：
 
 请求/响应结构见 `app/src/main/java/com/antihub/mobile/data/remote/AuthApiService.kt`。
 
+### 没有后端怎么办（本仓库已提供）
+
+仓库内已提供最小可用后端：`auth-proxy/`。
+
+快速步骤：
+
+1. 部署 `auth-proxy` 到 Railway / Render / Fly.io（Node 18+）。
+2. 在部署平台配置环境变量：
+   - `GH_OAUTH_CLIENT_ID`
+   - `GH_OAUTH_CLIENT_SECRET`
+   - `OAUTH_REDIRECT_URI_ALLOWLIST=githubmobile://auth`
+3. 拿到部署域名，例如 `https://proxy.example.com`。
+4. 仓库 Actions Secret `GH_AUTH_PROXY_BASE_URL` 填这个域名（不带路径）。
+
+详细说明见：`auth-proxy/README.md`
+
 ## 翻译说明
 
 - 默认使用 Google Translate API
