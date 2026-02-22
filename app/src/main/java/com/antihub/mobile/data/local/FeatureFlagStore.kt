@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -16,6 +17,7 @@ private val Context.featureFlagsDataStore by preferencesDataStore(name = "featur
 
 @Singleton
 class FeatureFlagStore @Inject constructor(
+    @ApplicationContext
     private val context: Context,
 ) {
     val flags: Flow<FeatureFlags> = context.featureFlagsDataStore.data
