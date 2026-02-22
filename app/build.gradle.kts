@@ -20,12 +20,16 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val githubClientId = System.getenv("GH_OAUTH_CLIENT_ID") ?: ""
-        val githubRedirectScheme = System.getenv("GH_OAUTH_REDIRECT_SCHEME") ?: "githubmobile"
-        val githubRedirectHost = System.getenv("GH_OAUTH_REDIRECT_HOST") ?: "auth"
-        val authProxyBaseUrl = System.getenv("GH_AUTH_PROXY_BASE_URL") ?: "https://example.com"
-        val translationApiBaseUrl = System.getenv("TRANSLATION_API_BASE_URL") ?: "https://translation.googleapis.com"
-        val translationApiKey = System.getenv("GOOGLE_TRANSLATE_API_KEY") ?: ""
+        fun envOrDefault(name: String, default: String): String {
+            return System.getenv(name)?.trim()?.takeIf { it.isNotBlank() } ?: default
+        }
+
+        val githubClientId = System.getenv("GH_OAUTH_CLIENT_ID")?.trim().orEmpty()
+        val githubRedirectScheme = envOrDefault("GH_OAUTH_REDIRECT_SCHEME", "githubmobile")
+        val githubRedirectHost = envOrDefault("GH_OAUTH_REDIRECT_HOST", "auth")
+        val authProxyBaseUrl = envOrDefault("GH_AUTH_PROXY_BASE_URL", "https://example.com")
+        val translationApiBaseUrl = envOrDefault("TRANSLATION_API_BASE_URL", "https://translation.googleapis.com")
+        val translationApiKey = System.getenv("GOOGLE_TRANSLATE_API_KEY")?.trim().orEmpty()
 
         buildConfigField("String", "GITHUB_CLIENT_ID", "\"$githubClientId\"")
         buildConfigField("String", "GITHUB_REDIRECT_SCHEME", "\"$githubRedirectScheme\"")

@@ -46,7 +46,7 @@ class AuthViewModel @Inject constructor(
     fun login(activity: Activity) {
         _authError.value = null
         authManager.login(activity).onFailure {
-            _authError.value = it.message ?: "无法打开浏览器，请检查系统浏览器"
+            _authError.value = it.message ?: "授权启动失败，请检查 OAuth 配置和系统浏览器"
         }
     }
 

@@ -47,6 +47,11 @@ export TRANSLATION_API_BASE_URL="https://translation.googleapis.com"
 export GOOGLE_TRANSLATE_API_KEY="your_google_api_key"
 ```
 
+OAuth 相关至少需要确保：
+
+- `GH_OAUTH_CLIENT_ID` 不能为空
+- GitHub OAuth App 的 Authorization callback URL 与客户端一致（默认）：`githubmobile://auth`
+
 ### 3. 构建 Debug APK
 
 ```sh
@@ -59,6 +64,13 @@ export GOOGLE_TRANSLATE_API_KEY="your_google_api_key"
 
 移动端不应内置 OAuth Client Secret。
 当前实现采用 `OAuth + PKCE` 发起授权，并将 `code` 发送到后端代理 `GH_AUTH_PROXY_BASE_URL` 进行安全换 token。
+
+如果你看到授权链接中出现：
+
+- `client_id=`
+- `redirect_uri=%3A%2F%2F`
+
+说明构建时 OAuth 环境变量为空，应用会拒绝发起授权并提示配置错误。
 
 后端至少需要实现：
 

@@ -40,10 +40,12 @@ class AuthManagerImpl @Inject constructor(
     }
 
     override fun login(activity: Activity): Result<Unit> {
-        val clientId = AppConfig.githubClientId
-        if (clientId.isBlank()) {
-            Timber.w("GitHub client id is missing, oauth may fail")
+        val configError = AppConfig.oauthConfigError()
+        if (configError != null) {
+            Timber.w(configError)
+            return Result.failure(IllegalStateException(configError))
         }
+        val clientId = AppConfig.githubClientId
 
         val verifier = PkceUtil.generateCodeVerifier()
         val challenge = PkceUtil.codeChallenge(verifier)
@@ -66,19 +68,6 @@ class AuthManagerImpl @Inject constructor(
             }
             val chooserIntent = Intent.createChooser(browserIntent, "使用浏览器继续 GitHub 授权")
             activity.startActivity(chooserIntent)
-        }
-
-        if (clientId.isBlank()) {
-            return openResult.fold(
-                onSuccess = {
-                    Result.failure(
-                        IllegalStateException(
-                            "未配置 GH_OAUTH_CLIENT_ID，已打开浏览器但授权可能失败",
-                        ),
-                    )
-                },
-                onFailure = { Result.failure(it) },
-            )
         }
 
         return openResult
