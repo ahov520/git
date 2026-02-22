@@ -1,8 +1,8 @@
 package com.antihub.mobile.data.auth
 
-import android.util.Base64
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.util.Base64
 
 object PkceUtil {
     private const val CODE_VERIFIER_LENGTH = 64
@@ -16,7 +16,7 @@ object PkceUtil {
 
     fun codeChallenge(codeVerifier: String): String {
         val bytes = MessageDigest.getInstance("SHA-256").digest(codeVerifier.toByteArray(Charsets.US_ASCII))
-        return Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
     }
 
     private fun randomString(length: Int): String {
