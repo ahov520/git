@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">GitHub Mobile</string>
+    <string name="action_login">登录 GitHub</string>
+    <string name="action_logout">退出登录</string>
+    <string name="action_retry">重试</string>
+    <string name="label_home">首页</string>
+    <string name="label_notifications">通知</string>
+    <string name="label_search">搜索</string>
+    <string name="label_profile">我的</string>
+    <string name="translation_toggle">自动翻译</string>
+</resources>
