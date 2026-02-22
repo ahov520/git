@@ -1,8 +1,8 @@
 package com.antihub.mobile.data.auth
 
 import android.app.Activity
+import android.content.Intent
 import android.net.Uri
-import androidx.browser.customtabs.CustomTabsIntent
 import com.antihub.mobile.core.config.AppConfig
 import com.antihub.mobile.core.model.TokenState
 import com.antihub.mobile.data.local.SecurePreferences
@@ -18,7 +18,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface AuthManager {
-    fun login(activity: Activity)
+    fun login(activity: Activity): Result<Unit>
     suspend fun logout()
     suspend fun refreshIfNeeded(): Boolean
     fun getTokenState(): StateFlow<TokenState>
@@ -39,11 +39,10 @@ class AuthManagerImpl @Inject constructor(
         hydrateTokenState()
     }
 
-    override fun login(activity: Activity) {
+    override fun login(activity: Activity): Result<Unit> {
         val clientId = AppConfig.githubClientId
         if (clientId.isBlank()) {
-            Timber.e("GitHub client id is missing, skip login")
-            return
+            Timber.w("GitHub client id is missing, oauth may fail")
         }
 
         val verifier = PkceUtil.generateCodeVerifier()
@@ -53,7 +52,7 @@ class AuthManagerImpl @Inject constructor(
         pendingAuthState = state
 
         val authUri = Uri.parse("https://github.com/login/oauth/authorize").buildUpon()
-            .appendQueryParameter("client_id", clientId)
+            .appendQueryParameter("client_id", clientId.ifBlank { "" })
             .appendQueryParameter("redirect_uri", AppConfig.oauthRedirectUri())
             .appendQueryParameter("scope", "read:user repo notifications")
             .appendQueryParameter("state", state)
@@ -61,10 +60,28 @@ class AuthManagerImpl @Inject constructor(
             .appendQueryParameter("code_challenge_method", "S256")
             .build()
 
-        CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .build()
-            .launchUrl(activity, authUri)
+        val openResult = runCatching {
+            val browserIntent = Intent(Intent.ACTION_VIEW, authUri).apply {
+                addCategory(Intent.CATEGORY_BROWSABLE)
+            }
+            val chooserIntent = Intent.createChooser(browserIntent, "使用浏览器继续 GitHub 授权")
+            activity.startActivity(chooserIntent)
+        }
+
+        if (clientId.isBlank()) {
+            return openResult.fold(
+                onSuccess = {
+                    Result.failure(
+                        IllegalStateException(
+                            "未配置 GH_OAUTH_CLIENT_ID，已打开浏览器但授权可能失败",
+                        ),
+                    )
+                },
+                onFailure = { Result.failure(it) },
+            )
+        }
+
+        return openResult
     }
 
     override suspend fun logout() {
